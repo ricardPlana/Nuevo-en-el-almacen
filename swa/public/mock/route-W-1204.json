@@ -1,0 +1,49 @@
+{
+  "workId": "W-1204",
+  "loadId": "LD-0042",
+  "warehouseId": "24",
+  "workStatus": "Open",
+  "strategy": "CityBlock",
+  "algorithm": "Fast",
+  "putLocation": {
+    "locationId": "DOCK-01",
+    "x": 4,
+    "y": -2,
+    "z": 0
+  },
+  "lines": [
+    {
+      "lineNum": 1,
+      "workType": "Pick",
+      "locationId": "B-08-1",
+      "itemId": "A0044",
+      "itemName": "Filtro de aire industrial",
+      "qty": 6,
+      "unit": "ea",
+      "x": 12,
+      "y": 21.5,
+      "z": 1,
+      "distanceToNext": 16.0
+    },
+    {
+      "lineNum": 2,
+      "workType": "Pick",
+      "locationId": "B-02-0",
+      "itemId": "A0050",
+      "itemName": "Guantes nitrilo (caja 100)",
+      "qty": 2,
+      "unit": "ea",
+      "x": 12,
+      "y": 6.5,
+      "z": 0,
+      "distanceToNext": 16.5
+    }
+  ],
+  "totalDistance": 32.5,
+  "explanation": [
+    "F&O construye la ruta de las 2 líneas desde el muelle DOCK-01 hacia atrás, eligiendo cada vez la ubicación más cercana, y después la invierte. Por eso el último pick (B-02-0) es el más cercano al muelle.",
+    "La altura cuenta al subir y al bajar: se suma el nivel de origen y el de destino. B-08-1 está en el nivel 1, así que añade 1 a cada tramo que llega o sale de ella.",
+    "Construcción desde el muelle: desde DOCK-01 lo más cercano era B-02-0 (16,5 m); B-08-1 quedaba a 32,5 m; desde B-02-0 lo más cercano era B-08-1 (16 m).",
+    "Recorrido total: 32,5 m hasta dejarlo todo en DOCK-01."
+  ]
+}

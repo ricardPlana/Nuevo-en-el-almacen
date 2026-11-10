@@ -1,0 +1,27 @@
+:root {
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light dark;
+  color: #1b1f24;
+  background: #f4f5f7;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  color: #e6e8eb;
+  background: #15181c;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}

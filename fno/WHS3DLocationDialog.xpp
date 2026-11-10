@@ -1,0 +1,135 @@
+// =====================================================================
+//  Botones "Información", "QR" y "Ver en 3D" en Ubicaciones (form WHSLocation, tabla WMSLocation): abren el hub o
+//  la vista 3D de la SWA ENCIMA del formulario, en un diálogo casi a pantalla completa (como "Ruta 3D" en Trabajo).
+//  Solo lectura.
+//
+//    Información  → /hub/?embed=location&...   ficha de la ubicación: qué contiene, picks pendientes, dónde está
+//    QR           → /hub/?embed=qr&...         etiquetas (QR para el móvil + código de barras para la app de
+//                                              almacén) de TODAS las filas marcadas; "Imprimir" abre el diálogo de
+//                                              impresión del navegador con las impresoras a las que tienes acceso
+//    Ver en 3D    → la vista 3D de siempre con la ubicación marcada (?locationId=)
+//
+//  Objetos en Visual Studio (por este orden):
+//
+//  1) Clase WHS3DUrl: añade el método hubUrl() (bloque "WHS3DUrl.hubUrl" de abajo). Los que ya tiene no cambian.
+//
+//  2) Form  WHS3DLocation   (igual que WHS3DWorkRoute)
+//     - Design: Pattern = Custom, Style = Dialog, Dialog Size = Full, Caption = "Almacén 3D".
+//     - Design > Group "DialogContent" con WebsiteHostControl  WH3DWebsite
+//         Width Mode = SizeToAvailable, Height Mode = SizeToAvailable, AutoDeclaration = Yes
+//     - Design > ButtonGroup "DialogCommitContainer" con un Button "CloseButton", Text = Cerrar,
+//       y su clicked() sobrescrito: super(); element.close();
+//     - Sin data sources: la ubicación llega por args().
+//     - Code: el bloque "Form" de abajo.
+//
+//  3) Tres Display menu items, los tres con Object Type = Form, Object = WHS3DLocation:
+//       WHS3DLocationInfo   Label = "Información"   Parameters = info
+//       WHS3DLocationQr     Label = "QR"            Parameters = qr
+//       WHS3DLocation3D     Label = "Ver en 3D"     Parameters = 3d
+//     Parameters en minúsculas y sin comillas. Para usuarios sin admin: añadirlos a un privilegio (Entry points).
+//
+//  4) Form extension  WHSLocation.<tu modelo>   (Gestión de almacenes > Configurar > Almacén > Ubicaciones;
+//     en la URL sale mi=WHSLocation. Ojo: el FORM es WHSLocation; la TABLA, WMSLocation).
+//     Action Pane > ActionPaneTab > New > Button Group "Almacen3D", Caption = "Almacén 3D", con tres
+//     Menu Item Button (arrastra los menu items desde el Solution Explorer):
+//       Menu Item Type = Display, Data Source = el de ubicaciones del form (WMSLocation), Needs Record = Yes
+//       WH3DInfoButton   Menu Item Name = WHS3DLocationInfo
+//       WH3DQrButton     Menu Item Name = WHS3DLocationQr     Multi Select = Yes  (imprime todas las marcadas)
+//       WH3D3DButton     Menu Item Name = WHS3DLocation3D
+//
+//  Build (sin errores: si no, no se despliega y el navegador sigue con lo anterior) y Ctrl+F5 en el navegador.
+//  No hace falta DB sync (no hay campos nuevos).
+// =====================================================================
+
+// ---------- Class WHS3DUrl: método nuevo (pégalo dentro de la clase, junto a baseUrl) ----------
+//    /// <summary>
+//    /// Hub de la SWA (/hub/): ficha de ubicación y etiquetas para los diálogos de Ubicaciones.
+//    /// </summary>
+//    public static str hubUrl()
+//    {
+//        return SwaBaseUrl + "hub/";
+//    }
+
+// ---------- Form: WHS3DLocation (código del form) ----------
+[Form]
+public class WHS3DLocation extends FormRun
+{
+    public void init()
+    {
+        super();
+
+        if (!element.args() || element.args().dataset() != tableNum(WMSLocation))
+        {
+            throw error("Abre esto desde una ubicación (Gestión de almacenes > Configurar > Almacén > Ubicaciones).");
+        }
+        WMSLocation loc = element.args().record();
+        str mode = element.args().parm();   // info | qr | 3d (Parameters del menu item)
+
+        str co  = System.Uri::EscapeDataString(loc.DataAreaId);
+        str wh  = System.Uri::EscapeDataString(loc.inventLocationId);
+        str upn = System.Uri::EscapeDataString(xUserInfo::find(false, curUserId()).networkAlias);
+
+        if (mode == "qr")
+        {
+            // Todas las filas marcadas en Ubicaciones (botón con Multi Select = Yes), del mismo almacén.
+            // getFirst(1) / getNext() recorren las marcadas del datasource del form (sin MultiSelectionHelper, que
+            // necesita otra referencia de paquete). Sin ninguna marcada, la fila actual.
+            str ids = "";
+            FormDataSource ds = FormDataUtil::getFormDataSource(loc);
+            if (ds)
+            {
+                WMSLocation sel;
+                for (sel = ds.getFirst(1); sel; sel = ds.getNext())
+                {
+                    if (sel.inventLocationId == loc.inventLocationId)
+                    {
+                        ids += (ids == "" ? "" : ",") + sel.wMSLocationId;
+                    }
+                }
+            }
+            if (ids == "")
+            {
+                ids = loc.wMSLocationId;
+            }
+            element.design().caption("Etiquetas QR");
+            WH3DWebsite.url(strFmt("%1?embed=qr&company=%2&warehouseId=%3&locs=%4&upn=%5",
+                WHS3DUrl::hubUrl(), co, wh, System.Uri::EscapeDataString(ids), upn));
+        }
+        else if (mode == "3d")
+        {
+            element.design().caption(strFmt("Vista 3D · %1", loc.wMSLocationId));
+            WH3DWebsite.url(strFmt("%1?warehouseId=%2&company=%3&locationId=%4&upn=%5&present=1",
+                WHS3DUrl::baseUrl(), wh, co, System.Uri::EscapeDataString(loc.wMSLocationId), upn));
+        }
+        else
+        {
+            element.design().caption(strFmt("Ubicación · %1", loc.wMSLocationId));
+            WH3DWebsite.url(strFmt("%1?embed=location&company=%2&warehouseId=%3&loc=%4&upn=%5",
+                WHS3DUrl::hubUrl(), co, wh, System.Uri::EscapeDataString(loc.wMSLocationId), upn));
+        }
+    }
+
+    [Control("Button")]
+    class CloseButton
+    {
+        public void clicked()
+        {
+            super();
+            element.close();
+        }
+    }
+}
+
+// ---------- Fin ----------
+// Comprobaciones:
+//  - Los botones no salen: el form extension es de WMSLocation en vez de WHSLocation, el Button Group está vacío,
+//    o el build tuvo errores (no se despliega). Después de un build bueno, Ctrl+F5.
+//  - "MultiSelectionHelper no existe": queda código antiguo; esta versión no lo usa.
+//  - "WHS3DUrl no contiene hubUrl": falta el método del paso 1.
+//  - Sale pequeño a la derecha: falta Dialog Size = Full en el Design.
+//  - "QR" solo imprime una aunque marques varias: el Menu Item Button no tiene Multi Select = Yes.
+//  - Ubicaciones de otro almacén marcadas a la vez: se ignoran (el diálogo es de un almacén).
+//  - Iframe en blanco: frame-ancestors de staticwebapp.config.json no incluye el dominio del Tier-1 (es el mismo que
+//    para la vista 3D, así que si "Ruta 3D" funciona, esto también).
+//  - Imprimir: el diálogo del navegador lista las impresoras del equipo y las de red a las que tienes acceso. Elige el
+//    formato (50×30, 100×50 o A4) antes de imprimir: el tamaño de página va con él.

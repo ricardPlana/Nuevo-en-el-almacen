@@ -1,0 +1,51 @@
+// =====================================================================
+//  Parámetro "Vista 3D V2" y URL base de la SWA en un solo sitio.
+//
+//  La SWA es una sola. Sirve la V1 (la de siempre) en la raíz y la V2 (más
+//  cuidada: luz de estudio, sombras suaves, cajas con textura, palés, entrada
+//  de cámara) en /v2/. Con el parámetro marcado, las tres pantallas de F&O
+//  (Almacenes, pestaña de Trabajo y diálogo Ruta 3D) abren la V2; desmarcado,
+//  la V1. Si la V2 va pesada en algún equipo, se desmarca y listo.
+//
+//  Objetos en Visual Studio:
+//
+//  1) Table extension  WHSParameters.WH3D
+//     Campo nuevo  D365_WH3DVistaV2   EDT = NoYesId, Label = "Vista 3D V2",
+//     Help Text = "Abre la vista 3D mejorada (/v2/). Desmarcado: la vista estándar."
+//
+//  2) Form extension  WHSParameters.WH3D   (Gestión de almacenes > Configurar > Parámetros de gestión de almacenes)
+//     Arrastra el campo desde Data Sources > WHSParameters > Fields a un grupo de la pestaña General
+//     (o crea un grupo "Vista 3D" en esa pestaña y ponlo dentro).
+//
+//  3) Class  WHS3DUrl  (el bloque de abajo).
+//
+//  4) En las tres pantallas, quita la constante SwaBaseUrl y usa WHS3DUrl::baseUrl():
+//     - InventLocation_WH3D_Extension.wh3dBuildUrl   (WHS3DInventLocation_Extension.xpp)
+//     - WHSWorkTable_WH3D_Extension.wh3dBuildUrl     (WHS3DWorkTable_Extension.xpp, si tienes la pestaña)
+//     - Form WHS3DWorkRoute.init                     (WHS3DWorkRouteDialog.xpp)
+//     Es cambiar   strFmt("%1?...", SwaBaseUrl, ...)   por   strFmt("%1?...", WHS3DUrl::baseUrl(), ...)
+//
+//  Build. No hace falta DB sync para la clase, sí para el campo nuevo de la tabla.
+// =====================================================================
+
+// ---------- Class: WHS3DUrl ----------
+public final class WHS3DUrl
+{
+    // Pon aquí el host de TU Static Web App (az staticwebapp show ... --query defaultHostname), con la barra final.
+    // En producción, mejor en un parámetro propio que en una constante.
+    private const str SwaBaseUrl = "https://REPLACE-swa.azurestaticapps.net/";
+
+    /// <summary>
+    /// Raíz de la SWA para la empresa actual: la V1 o, con "Vista 3D V2" marcado en los parámetros de almacén, /v2/.
+    /// </summary>
+    public static str baseUrl()
+    {
+        return WHSParameters::find().D365_WH3DVistaV2 ? SwaBaseUrl + "v2/" : SwaBaseUrl;
+    }
+}
+
+// ---------- Fin ----------
+// Comprobaciones:
+//  - Para probar la V2 sin tocar el parámetro: en la pestaña nueva del navegador, añade /v2/ tras el dominio
+//    (o &look=v2 a la URL). Con &look=v1 se fuerza la V1 aunque la URL sea /v2/.
+//  - El parámetro es por empresa (WHSParameters): en w3d puede ir la V2 y en usmf la V1.

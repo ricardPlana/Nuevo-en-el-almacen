@@ -1,0 +1,74 @@
+// =====================================================================
+//  Botón "Ruta 3D" en Trabajo (WHSWorkTable) que abre la ruta 3D de la SWA
+//  ENCIMA del formulario, en un diálogo casi a pantalla completa.
+//  Se cierra con "Cerrar" y vuelves al trabajo tal como estaba.
+//
+//  Objetos en Visual Studio (por este orden):
+//
+//  1) Form  WHS3DWorkRoute
+//     - Design: Pattern = "Dialog - Read Only", Caption = "Ruta 3D",
+//       Style = Dialog, Dialog Size = Full   (Full = casi todo el ancho del navegador; sin esto sale pequeño a la derecha).
+//     - Design > Group "DialogContent" (lo crea el patrón) con:
+//         WebsiteHostControl  WH3DWebsite   Width Mode = SizeToAvailable, Height Mode = SizeToAvailable,
+//                                           AutoDeclaration = Yes
+//       Si el patrón no deja meter el Website Host dentro de DialogContent, pon el Pattern del Design en "Custom".
+//     - Design > ButtonGroup "DialogCommitContainer" con un Button (normal, no Command Button) "CloseButton",
+//       Text = Cerrar, y su método clicked() sobrescrito (bloque "CloseButton" de abajo). El Command Button de
+//       algunas versiones no enseña las propiedades Command ni Text.
+//     - Sin data sources: el work llega por args().
+//     - WH3DWebsite con AutoDeclaration = Yes (el código lo usa por nombre).
+//     - Code: el bloque "Form" de abajo (botón derecho en el form > View code y sustituye la clase).
+//
+//  2) Display menu item  WHS3DWorkRoute
+//     Object Type = Form, Object = WHS3DWorkRoute, Label = "Ruta 3D".
+//     Para usuarios sin admin: añadirlo a un privilegio (Entry points) de un rol de almacén.
+//
+//  3) Form extension  WHSWorkTable.WH3D
+//     Action Pane > pestaña "Work" (o la que prefieras) > un button group existente >
+//     New > Menu Item Button  WH3DRouteButton:
+//       Menu Item Type = Display, Menu Item Name = WHS3DWorkRoute,
+//       Data Source = WHSWorkTable, Needs Record = Yes, Text = "Ruta 3D".
+//     Con Data Source = WHSWorkTable, el work seleccionado llega al diálogo en args().record().
+//
+//  Si también tienes la pestaña de WHS3DWorkTable_Extension.xpp, puedes quitarla: el diálogo la sustituye.
+// =====================================================================
+
+// ---------- Form: WHS3DWorkRoute (código del form) ----------
+[Form]
+public class WHS3DWorkRoute extends FormRun
+{
+    // URL base (V1 o /v2/ según el parámetro "Vista 3D V2"): WHS3DUrl.xpp.
+
+    public void init()
+    {
+        super();
+
+        if (!element.args() || element.args().dataset() != tableNum(WHSWorkTable))
+        {
+            throw error("Abre la ruta 3D desde un trabajo.");
+        }
+        WHSWorkTable work = element.args().record();
+
+        element.design().caption(strFmt("Ruta 3D · %1", work.WorkId));
+        WH3DWebsite.url(strFmt("%1?warehouseId=%2&company=%3&upn=%4&present=1#workId=%5",
+            WHS3DUrl::baseUrl(),
+            System.Uri::EscapeDataString(work.InventLocationId),   // almacén del work: la SWA carga su plano a la vez que la ruta
+            System.Uri::EscapeDataString(work.DataAreaId),         // empresa del registro: la SWA filtra todo por ella
+            System.Uri::EscapeDataString(xUserInfo::find(false, curUserId()).networkAlias),
+            System.Uri::EscapeDataString(work.WorkId)));
+    }
+}
+
+// ---------- CloseButton > Methods > Override > clicked ----------
+//    public void clicked()
+//    {
+//        super();
+//        element.close();
+//    }
+
+// ---------- Fin ----------
+// Comprobaciones:
+//  - Sale pequeño a la derecha: falta Dialog Size = Full en el Design.
+//  - Sale cortado por abajo: el Website Host no tiene Height Mode = SizeToAvailable.
+//  - Iframe en blanco: frame-ancestors de staticwebapp.config.json no incluye el dominio del Tier-1.
+//  - Dentro del diálogo, el botón "Pestaña nueva" de la SWA abre la misma ruta en otra pestaña del navegador.

@@ -1,0 +1,375 @@
+openapi: 3.0.3
+info:
+  title: WH3D Warehouse Route API
+  version: "1.0"
+  description: >
+    Rutas de picking de D365 SCM con coordenadas espaciales, para visualización 3D
+    y para el agente de Copilot Studio. Solo lectura.
+servers:
+  - url: https://REPLACE-swa.azurestaticapps.net/api
+security:
+  - agentKey: []
+paths:
+  /health:
+    get:
+      operationId: GetHealth
+      summary: Estado de la API
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  mockMode: { type: boolean }
+                  version: { type: string }
+  /warehouses/{warehouseId}/layout:
+    get:
+      operationId: GetLayout
+      summary: Layout 3D del almacén (ubicaciones con coordenadas)
+      parameters:
+        - { $ref: "#/components/parameters/company" }
+        - { name: warehouseId, in: path, required: true, schema: { type: string }, example: "24" }
+        - { name: refresh, in: query, required: false, schema: { type: string, enum: ["1"] }, description: "Vuelve a leer de F&O en vez de usar la caché (5 min)" }
+      responses:
+        "200":
+          description: Layout
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Layout" }
+  /warehouses/{warehouseId}/locations/{locationId}:
+    get:
+      operationId: GetLocation
+      summary: Dónde está una ubicación (zona, pasillo, nivel, coordenadas, enlace al mapa 3D)
+      description: Úsalo cuando el usuario pregunte dónde está una ubicación o qué hay cerca.
+      parameters:
+        - { $ref: "#/components/parameters/company" }
+        - { name: warehouseId, in: path, required: true, schema: { type: string }, example: "24" }
+        - { name: locationId, in: path, required: true, schema: { type: string }, example: "A-05-1" }
+      responses:
+        "200":
+          description: Detalle
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LocationDetail" }
+        "404": { description: No existe }
+  /warehouses/{warehouseId}/works:
+    get:
+      operationId: ListWorks
+      summary: Histórico de works de venta del almacén (más recientes primero)
+      parameters:
+        - { $ref: "#/components/parameters/company" }
+        - { name: warehouseId, in: path, required: true, schema: { type: string }, example: "24" }
+        - { name: status, in: query, required: false, schema: { type: string, enum: [open, closed, all] } }
+        - { name: top, in: query, required: false, schema: { type: integer, default: 50 } }
+      responses:
+        "200":
+          description: Works
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/WorkSummary" }
+  /warehouses/{warehouseId}/stock:
+    get:
+      operationId: GetStock
+      summary: Stock disponible y picks abiertos por ubicación (vista de almacén)
+      parameters:
+        - { $ref: "#/components/parameters/company" }
+        - { name: warehouseId, in: path, required: true, schema: { type: string }, example: "24" }
+      responses:
+        "200":
+          description: Stock
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WarehouseStock" }
+        "404": { description: Almacén no encontrado }
+  /work/{workId}/route:
+    get:
+      operationId: GetRoute
+      summary: Ruta de picking de un work, en el orden calculado por D365 SCM
+      description: >
+        Úsalo cuando el usuario pregunte qué tiene que recoger, por dónde empezar o por qué
+        la ruta va en ese orden. Devuelve las líneas ya ordenadas, distancias y frases de explicación.
+      parameters:
+        - { $ref: "#/components/parameters/company" }
+        - { name: workId, in: path, required: true, schema: { type: string }, example: "W-1203" }
+      responses:
+        "200":
+          description: Ruta
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Route" }
+        "404": { description: Work no encontrado }
+  /works/started:
+    get:
+      operationId: ListStartedWorks
+      summary: Works que un operario acaba de coger en la app móvil de almacén, con su correo y la tarjeta de la ruta
+      description: >
+        Para el aviso "tu ruta" de Power Automate. Un work está cogido cuando F&O tiene "Locked by" relleno
+        (usuario de la app móvil) y está abierto o en curso. Devuelve los que empezaron en los últimos `minutes`
+        (hora de inicio del work en F&O; sin hora no se devuelven), con el correo del empleado (Entra o de contacto)
+        y la Adaptive Card de la ruta como texto (`cardJson`), lista para la acción de Teams.
+      parameters:
+        - { $ref: "#/components/parameters/company" }
+        - { name: warehouseId, in: query, required: false, schema: { type: string }, example: "CH01" }
+        - { name: minutes, in: query, required: false, description: "Ventana en minutos (por defecto 5; 0 = todos los cogidos ahora)", schema: { type: integer, default: 5 } }
+      responses:
+        "200":
+          description: Works cogidos en la ventana
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StartedWork" }
+  /loads/{loadId}/route:
+    get:
+      operationId: GetLoadRoute
+      summary: Rutas de todos los works de una carga
+      description: Úsalo cuando el usuario dé un número de carga (load) en lugar de un work.
+      parameters:
+        - { $ref: "#/components/parameters/company" }
+        - { name: loadId, in: path, required: true, schema: { type: string }, example: "LD-0042" }
+      responses:
+        "200":
+          description: Rutas
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Route" }
+  /work/{workId}/card:
+    get:
+      operationId: GetRouteCard
+      summary: Adaptive Card con la ruta y el botón "Ver ruta en 3D"
+      description: Devuelve una Adaptive Card para mostrar al usuario en Teams.
+      parameters:
+        - { $ref: "#/components/parameters/company" }
+        - { name: workId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Adaptive Card JSON
+          content:
+            application/json:
+              schema: { type: object }
+components:
+  parameters:
+    company:
+      name: company
+      in: query
+      required: false
+      description: Empresa de F&O (dataAreaId, hasta 4 caracteres). Si no se indica, la del app setting FNO_COMPANY.
+      schema: { type: string, pattern: "^[A-Za-z0-9]{1,4}$" }
+      example: usmf
+  securitySchemes:
+    agentKey:
+      type: apiKey
+      in: header
+      name: x-wh3d-key
+      description: API key del agente (app setting AGENT_API_KEY). La SPA usa X-Wh3d-Token con un token de Entra.
+  schemas:
+    Location:
+      type: object
+      required: [locationId, zone, aisle, rack, level, x, y, z]
+      properties:
+        locationId: { type: string }
+        zone: { type: string }
+        aisle: { type: string }
+        rack: { type: integer }
+        level: { type: integer }
+        x: { type: number }
+        y: { type: number }
+        z: { type: number }
+        profile: { type: string }
+        sizeX: { type: number }
+        sizeY: { type: number }
+        sizeZ: { type: number }
+        baseZ: { type: number, description: "Metros desde el suelo donde empieza el hueco (alturas reales del perfil apiladas en su columna). Sin él, level × levelHeight." }
+        fno:
+          type: object
+          description: "La ubicación tal cual está en F&O (WarehouseLocations). Usa estos valores al hablar de zona, pasillo, rack, estante, hueco o coordenadas; zone/aisle/rack/level/x/y de arriba son los del dibujo 3D."
+          properties:
+            zone: { type: string, description: "Zona de WHS (WarehouseZoneId)" }
+            aisle: { type: string, description: "Pasillo (WarehouseAisleId)" }
+            rack: { type: integer, description: "RackId" }
+            shelf: { type: integer, description: "Estante (ShelfId)" }
+            bin: { type: integer, description: "Hueco (BinId)" }
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+    LocationDetail:
+      allOf:
+        - $ref: "#/components/schemas/Location"
+        - type: object
+          properties:
+            deepLinkTeams: { type: string }
+            deepLinkWeb: { type: string }
+            neighbours:
+              type: array
+              items: { type: string }
+    Layout:
+      type: object
+      properties:
+        warehouseId: { type: string }
+        name: { type: string }
+        bounds:
+          type: object
+          properties:
+            minX: { type: number }
+            maxX: { type: number }
+            minY: { type: number }
+            maxY: { type: number }
+            maxLevel: { type: integer }
+        locations:
+          type: array
+          items: { $ref: "#/components/schemas/Location" }
+        putLocations:
+          type: array
+          items: { type: string }
+        distanceStrategy: { type: string, enum: [StraightLine, CityBlock] }
+        sortAlgorithm: { type: string, enum: [Fast, Optimized] }
+        building:
+          type: object
+          description: Nave (campos D365_* del almacén). Solo si está definida en F&O.
+          properties:
+            length: { type: number }
+            width: { type: number }
+            clearHeight: { type: number }
+            rackHeight: { type: number }
+        zones:
+          type: array
+          items:
+            type: object
+            properties:
+              number: { type: integer }
+              name: { type: string }
+              function: { type: string, enum: [Receiving, PutAway, Storage, Consolidation, Shipping] }
+              x: { type: number }
+              length: { type: number }
+              width: { type: number }
+        aisles:
+          type: array
+          items:
+            type: object
+            properties:
+              aisleId: { type: string }
+              name: { type: string }
+              x: { type: number }
+              minY: { type: number }
+              maxY: { type: number }
+        levelHeight: { type: number, description: "Metros por nivel (altura de estanterías / niveles). Sin él, 1,2." }
+    RouteLine:
+      type: object
+      properties:
+        lineNum: { type: integer }
+        workType: { type: string, enum: [Pick, Put] }
+        locationId: { type: string }
+        itemId: { type: string }
+        itemName: { type: string }
+        qty: { type: number }
+        unit: { type: string }
+        x: { type: number }
+        y: { type: number }
+        z: { type: number }
+        distanceToNext: { type: number }
+        pickedAt: { type: string, format: date-time }
+    Route:
+      type: object
+      properties:
+        workId: { type: string }
+        loadId: { type: string }
+        warehouseId: { type: string }
+        workStatus: { type: string }
+        strategy: { type: string, enum: [StraightLine, CityBlock] }
+        algorithm: { type: string, enum: [Fast, Optimized] }
+        putLocation:
+          type: object
+          properties:
+            locationId: { type: string }
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+        lines:
+          type: array
+          items: { $ref: "#/components/schemas/RouteLine" }
+        totalDistance: { type: number }
+        explanation:
+          type: array
+          items: { type: string }
+        startedAt: { type: string, format: date-time }
+        closedAt: { type: string, format: date-time }
+        orderNumber:
+          type: string
+          description: Pedido del work (SourceOrderNumber).
+        previousPut:
+          type: string
+          description: "La ruta es un tramo posterior del work: la ubicación donde se dejó la mercancía en el tramo anterior (STAGE-OUT). Sin este campo, es el primer tramo."
+        startLocation:
+          description: De dónde sale el picker (D365_UbicacionInicio del almacén). F&O no lo usa al ordenar ni entra en totalDistance.
+          type: object
+          properties:
+            locationId: { type: string }
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+    WarehouseStock:
+      type: object
+      properties:
+        warehouseId: { type: string }
+        asOf: { type: string, format: date-time }
+        qtyBasis: { type: string, example: AvailablePhysical }
+        locations:
+          type: array
+          items:
+            type: object
+            properties:
+              locationId: { type: string }
+              qty: { type: number }
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    itemId: { type: string }
+                    itemName: { type: string }
+                    qty: { type: number }
+                    unit: { type: string }
+                    licensePlate: { type: string }
+                    inventoryStatus: { type: string }
+              openPicks:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    workId: { type: string }
+                    lineNum: { type: integer }
+                    itemId: { type: string }
+                    qty: { type: number }
+                    unit: { type: string }
+    StartedWork:
+      type: object
+      properties:
+        workId: { type: string }
+        warehouseId: { type: string }
+        loadId: { type: string }
+        workStatus: { type: string }
+        startedAt: { type: string, format: date-time }
+        userId: { type: string, description: Usuario de la app móvil (Locked by) }
+        personnelNumber: { type: string }
+        workerName: { type: string }
+        email: { type: string, description: Correo de Entra del empleado o, si no tiene usuario, el de contacto }
+        picks: { type: integer }
+        totalDistance: { type: number }
+        cardJson: { type: string, description: Adaptive Card 1.5 de la ruta como texto }
+    WorkSummary:
+      type: object
+      properties:
+        workId: { type: string }
+        loadId: { type: string }
+        warehouseId: { type: string }
+        workStatus: { type: string }
+        startedAt: { type: string, format: date-time }
+        closedAt: { type: string, format: date-time }

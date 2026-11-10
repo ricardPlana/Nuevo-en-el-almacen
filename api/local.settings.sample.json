@@ -1,0 +1,19 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "MOCK_MODE": "true",
+    "AUTH_DISABLED": "true",
+    "ENTRA_TENANT_ID": "",
+    "ENTRA_API_AUDIENCE": "",
+    "AGENT_API_KEY": "local-dev-key",
+    "FNO_URL": "",
+    "FNO_CLIENT_ID": "",
+    "FNO_CLIENT_SECRET": "",
+    "SWA_URL": "http://localhost:5173",
+    "TEAMS_APP_ID": "",
+    "TEAMS_ENTITY_ID": "mapa3d",
+    "FNO_COMPANY": "usmf"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.19/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.19",
+  "version": "1.0.0",
+  "id": "REPLACE-TEAMS-APP-ID-GUID",
+  "developer": {
+    "name": "Algoritmia8",
+    "websiteUrl": "https://REPLACE-swa.azurestaticapps.net",
+    "privacyUrl": "https://REPLACE-swa.azurestaticapps.net/privacy",
+    "termsOfUseUrl": "https://REPLACE-swa.azurestaticapps.net/terms"
+  },
+  "name": { "short": "Almacén 3D", "full": "Almacén 3D — rutas de picking de D365 SCM" },
+  "description": {
+    "short": "Mira a dónde ir: tu ruta de picking en 3D y un asistente que la explica.",
+    "full": "Reconstruye el almacén en 3D a partir de las coordenadas espaciales de Dynamics 365 Supply Chain Management y muestra la ruta de picking de cada work. Incluye un asistente que responde dónde está el material y por qué la ruta va en ese orden."
+  },
+  "icons": { "color": "color.png", "outline": "outline.png" },
+  "accentColor": "#1F4E79",
+  "staticTabs": [
+    {
+      "entityId": "mapa3d",
+      "name": "Mapa 3D",
+      "contentUrl": "https://REPLACE-swa.azurestaticapps.net/?host=teams",
+      "websiteUrl": "https://REPLACE-swa.azurestaticapps.net/",
+      "scopes": ["personal"]
+    },
+    {
+      "entityId": "hub",
+      "name": "Hub",
+      "contentUrl": "https://REPLACE-swa.azurestaticapps.net/hub/?host=teams",
+      "websiteUrl": "https://REPLACE-swa.azurestaticapps.net/hub/",
+      "scopes": ["personal"]
+    }
+  ],
+  "configurableTabs": [
+    {
+      "configurationUrl": "https://REPLACE-swa.azurestaticapps.net/teams-config",
+      "canUpdateConfiguration": true,
+      "scopes": ["team", "groupChat"]
+    }
+  ],
+  "bots": [
+    {
+      "botId": "REPLACE-COPILOT-STUDIO-BOT-APP-ID",
+      "scopes": ["personal", "team", "groupChat"],
+      "supportsFiles": false,
+      "isNotificationOnly": false
+    }
+  ],
+  "permissions": ["identity", "messageTeamMembers"],
+  "validDomains": [
+    "REPLACE-swa.azurestaticapps.net",
+    "token.botframework.com"
+  ],
+  "webApplicationInfo": {
+    "id": "REPLACE-wh3d-app-CLIENT-ID",
+    "resource": "api://REPLACE-swa.azurestaticapps.net/REPLACE-wh3d-app-CLIENT-ID"
+  }
+}

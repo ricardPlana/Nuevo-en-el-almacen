@@ -1,0 +1,18 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/assets/*", "/mock/*", "/*.{png,svg,ico,json}"]
+  },
+  "globalHeaders": {
+    "Content-Security-Policy": "frame-ancestors 'self' https://*.operations.dynamics.com https://*.dynamics.com https://*.cloudax.dynamics.com https://teams.microsoft.com https://*.teams.microsoft.com https://*.cloud.microsoft https://*.office.com https://*.microsoft365.com https://*.sharepoint.com",
+    "Referrer-Policy": "strict-origin-when-cross-origin"
+  },
+  "routes": [
+    { "route": "/hub", "rewrite": "/hub/index.html" },
+    { "route": "/hub/*", "rewrite": "/hub/index.html" },
+    { "route": "/mock/*", "headers": { "Cache-Control": "no-cache" } },
+    { "route": "/assets/*", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } }
+  ],
+  "mimeTypes": { ".json": "application/json" },
+  "platform": { "apiRuntime": "dotnet-isolated:10.0" }
+}

@@ -1,0 +1,71 @@
+// =====================================================================
+//  Form extension de WHSWorkTable (Gestión de almacenes > Trabajo >
+//  Detalles del trabajo; desde "Todos los trabajos" se llega abriendo un work)
+//  con la ruta 3D de la SWA embebida.
+//  Diseño: en el AOT, extensión de formulario WHSWorkTable.WH3D con un
+//  TabPage nuevo "Mapa3D" (caption "Ruta 3D") que contiene un control
+//  WebsiteHostControl llamado WH3DWebsite (Width Mode = SizeToAvailable, Height = 650 Manual, AutoDeclaration = Yes).
+//  Es lo mismo que la pestaña "Almacén 3D" de Almacenes, pero con el work seleccionado.
+//  El URL se asigna por código al cambiar el registro activo:
+//    https://<swa>/?warehouseId=<InventLocationId>&company=<DataAreaId>&upn=<usuario>&present=1#workId=<WorkId>
+//  El work va detrás de # a propósito: al pasar a otro work del MISMO almacén solo cambia el fragmento,
+//  el iframe no se recarga y la SPA cambia de ruta sin volver a pedir el plano (unos segundos menos por work).
+//  Si el work es de otro almacén cambia la query y el iframe se recarga entero.
+//  En Visual Studio son DOS objetos Class: cada bloque de abajo va en su propia
+//  clase (Add > New Item > Class) con el nombre indicado. No pegues el fichero entero.
+// =====================================================================
+
+// ---------- Clase 1: WHSWorkTable_WH3D_Extension ----------
+[ExtensionOf(formStr(WHSWorkTable))]
+final class WHSWorkTable_WH3D_Extension
+{
+    // URL base (V1 o /v2/ según el parámetro "Vista 3D V2"): WHS3DUrl.xpp.
+
+    // Último URL enviado al iframe: Activated salta también al guardar o refrescar el mismo work.
+    private str wh3dLastUrl;
+
+    private str wh3dBuildUrl(WHSWorkTable _work)
+    {
+        return strFmt("%1?warehouseId=%2&company=%3&upn=%4&present=1#workId=%5",
+            WHS3DUrl::baseUrl(),
+            System.Uri::EscapeDataString(_work.InventLocationId), // almacén del work: la SWA carga su plano a la vez que la ruta
+            System.Uri::EscapeDataString(_work.DataAreaId),       // empresa del registro: la SWA filtra todo por ella
+            System.Uri::EscapeDataString(xUserInfo::find(false, curUserId()).networkAlias),
+            System.Uri::EscapeDataString(_work.WorkId));
+    }
+
+    public void wh3dRefresh()
+    {
+        WHSWorkTable work = this.WHSWorkTable_ds.cursor();
+        // Desde una clase de extensión el control no se alcanza con this.WH3DWebsite: se busca por nombre.
+        WebsiteHostControl host = this.design().controlName(formControlStr(WHSWorkTable, WH3DWebsite)) as WebsiteHostControl;
+        if (!work.WorkId || !host)
+        {
+            return;
+        }
+        str url = this.wh3dBuildUrl(work);
+        if (url != wh3dLastUrl)
+        {
+            wh3dLastUrl = url;
+            host.url(url);   // url() ignora (sin error) lo que no sea https
+        }
+    }
+}
+
+// ---------- Clase 2: WHSWorkTable_WH3D_EventHandler ----------
+// Event handler del datasource: cada vez que cambia el work seleccionado, cambia la ruta del iframe.
+class WHSWorkTable_WH3D_EventHandler
+{
+    [FormDataSourceEventHandler(formDataSourceStr(WHSWorkTable, WHSWorkTable), FormDataSourceEventType::Activated)]
+    public static void WHSWorkTable_OnActivated(FormDataSource _sender, FormDataSourceEventArgs _e)
+    {
+        FormRun fr = _sender.formRun();
+        fr.wh3dRefresh();
+    }
+}
+
+// ---------- Fin. Esto ya no va en ninguna clase ----------
+// Comprobaciones:
+//  - Si el iframe sale en blanco: frame-ancestors de la SWA no incluye el dominio del Tier-1.
+//  - Si sale el login de Entra dentro del iframe y se queda colgado: la SPA ha usado loginRedirect.
+//  - En onebox: dominio *.onebox.dynamics.com; añadirlo a staticwebapp.config.json.

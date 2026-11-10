@@ -1,0 +1,60 @@
+// =====================================================================
+//  Form extension de InventLocation (Gestión de almacenes > Configurar >
+//  Almacén > Almacenes) con la vista de almacén de la SWA embebida.
+//  Diseño: en el AOT, extensión de formulario InventLocation.WH3D con un
+//  TabPage nuevo "Mapa3D" (caption "Almacén 3D") que contiene un control
+//  WebsiteHostControl llamado WH3DWebsite (Width Mode = SizeToAvailable, Height = 650 Manual,
+//  AutoDeclaration = Yes).
+//  El URL se asigna por código al cambiar el almacén seleccionado:
+//    https://<swa>/?warehouseId=<InventLocationId>&company=<DataAreaId>&upn=<usuario>&present=1
+//  La SPA abre la vista de almacén (stock, ocupación y picks pendientes, sin rutas);
+//  desde la ficha de una ubicación, "Ver ruta" salta a la ruta del work.
+//  En Visual Studio son DOS objetos Class: cada bloque de abajo va en su propia
+//  clase (Add > New Item > Class) con el nombre indicado. No pegues el fichero entero.
+// =====================================================================
+
+// ---------- Clase 1: InventLocation_WH3D_Extension ----------
+[ExtensionOf(formStr(InventLocation))]
+final class InventLocation_WH3D_Extension
+{
+    // URL base (V1 o /v2/ según el parámetro "Vista 3D V2"): WHS3DUrl.xpp.
+
+    private str wh3dBuildUrl(InventLocation _warehouse)
+    {
+        return strFmt("%1?warehouseId=%2&company=%3&upn=%4&present=1",
+            WHS3DUrl::baseUrl(),
+            System.Uri::EscapeDataString(_warehouse.InventLocationId),
+            System.Uri::EscapeDataString(_warehouse.DataAreaId),   // empresa del registro: la SWA filtra todo por ella
+            System.Uri::EscapeDataString(xUserInfo::find(false, curUserId()).networkAlias));
+    }
+
+    public void wh3dRefresh()
+    {
+        InventLocation warehouse = this.InventLocation_ds.cursor();
+        // Desde una clase de extensión el control no se alcanza con this.WH3DWebsite: se busca por nombre.
+        WebsiteHostControl host = this.design().controlName(formControlStr(InventLocation, WH3DWebsite)) as WebsiteHostControl;
+        if (warehouse && host)
+        {
+            host.url(this.wh3dBuildUrl(warehouse));   // url() ignora (sin error) lo que no sea https
+        }
+    }
+}
+
+// ---------- Clase 2: InventLocation_WH3D_EventHandler ----------
+// Event handler del datasource: cada vez que cambia el almacén seleccionado, recarga el iframe.
+class InventLocation_WH3D_EventHandler
+{
+    [FormDataSourceEventHandler(formDataSourceStr(InventLocation, InventLocation), FormDataSourceEventType::Activated)]
+    public static void InventLocation_OnActivated(FormDataSource _sender, FormDataSourceEventArgs _e)
+    {
+        FormRun fr = _sender.formRun();
+        fr.wh3dRefresh();
+    }
+}
+
+// ---------- Fin. Esto ya no va en ninguna clase ----------
+// Comprobaciones:
+//  - Solo tiene sentido en almacenes con la feature Warehouse spatial location y coordenadas XYZ
+//    en las ubicaciones; si no, la SPA dirá que no encuentra el almacén.
+//  - La empresa la fija la SWA (app setting FNO_COMPANY), no el form: abre los almacenes de esa empresa.
+//  - Iframe en blanco: frame-ancestors de staticwebapp.config.json no incluye el dominio del Tier-1.

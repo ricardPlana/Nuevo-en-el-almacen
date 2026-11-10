@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "API: Functions (.NET 10)",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:azureFunctions.pickProcess}",
+      "preLaunchTask": "api: func host start"
+    },
+    {
+      "name": "SPA: Vite (Edge)",
+      "type": "msedge",
+      "request": "launch",
+      "url": "http://localhost:5173/?workId=W-1203",
+      "webRoot": "${workspaceFolder}/swa",
+      "preLaunchTask": "swa: vite dev"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "WH3D: API + SPA",
+      "configurations": ["API: Functions (.NET 10)", "SPA: Vite (Edge)"],
+      "stopAll": true
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "api: build",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/api/Wh3d.Api.csproj"],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "api: func host start",
+      "type": "shell",
+      "command": "func host start --port 7071",
+      "options": { "cwd": "${workspaceFolder}/api" },
+      "dependsOn": "api: build",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "func",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activesBegin": true,
+          "beginsPattern": "^.*(Azure Functions Core Tools|Found the following functions).*$",
+          "endsPattern": "^.*(Worker process started and initialized|Host lock lease acquired|Functions:).*$"
+        }
+      }
+    },
+    {
+      "label": "swa: vite dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/swa" },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activesBegin": true,
+          "beginsPattern": "^.*VITE.*$",
+          "endsPattern": "^.*Local:.*$"
+        }
+      }
+    }
+  ]
+}

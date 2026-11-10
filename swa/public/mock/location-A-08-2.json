@@ -1,0 +1,22 @@
+{
+  "locationId": "A-08-2",
+  "zone": "BULK",
+  "aisle": "A",
+  "rack": 8,
+  "level": 2,
+  "x": 6,
+  "y": 21.5,
+  "z": 2,
+  "profile": "BULK",
+  "sizeX": 1.2,
+  "sizeY": 1.0,
+  "sizeZ": 1.0,
+  "deepLinkWeb": "https://REPLACE-swa.azurestaticapps.net/?locationId=A-08-2&present=1",
+  "deepLinkTeams": "https://teams.microsoft.com/l/entity/REPLACE-TEAMS-APP-ID/mapa3d?context=%7B%22subEntityId%22%3A%22loc%3AA-08-2%22%7D",
+  "neighbours": [
+    "A-08-0",
+    "A-08-1",
+    "A-07-0",
+    "A-07-1"
+  ]
+}

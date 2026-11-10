@@ -1,0 +1,28 @@
+# Node / Vite
+node_modules/
+dist/
+*.local
+
+# .NET / Functions
+bin/
+obj/
+api/publish/
+local.settings.json
+
+# Editor / SO
+.vs/
+*.user
+.DS_Store
+Thumbs.db
+
+# Teams package
+teams/*.zip
+
+# Python
+__pycache__/
+
+# Teams
+teams/build/
+teams/teams.env
+tools/plan24.json
+tools/layout-24-plan.json

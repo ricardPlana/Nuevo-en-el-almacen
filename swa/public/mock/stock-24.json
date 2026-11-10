@@ -1,0 +1,709 @@
+{
+  "warehouseId": "24",
+  "asOf": "2026-10-27T08:00:00Z",
+  "qtyBasis": "AvailablePhysical",
+  "locations": [
+    {
+      "locationId": "A-01-2",
+      "qty": 89,
+      "items": [
+        {
+          "itemId": "A0014",
+          "itemName": "Rodamiento 6204 2RS",
+          "qty": 89,
+          "unit": "ea",
+          "licensePlate": "LP-A-01-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "A-02-0",
+      "qty": 11,
+      "items": [
+        {
+          "itemId": "A0020",
+          "itemName": "Cable 3x2,5 (rollo 100 m)",
+          "qty": 11,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": [
+        {
+          "workId": "W-1203",
+          "lineNum": 5,
+          "itemId": "A0020",
+          "qty": 3,
+          "unit": "ea"
+        }
+      ]
+    },
+    {
+      "locationId": "A-02-2",
+      "qty": 220,
+      "items": [
+        {
+          "itemId": "A0014",
+          "itemName": "Rodamiento 6204 2RS",
+          "qty": 220,
+          "unit": "ea",
+          "licensePlate": "LP-A-02-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "A-03-0",
+      "qty": 33,
+      "items": [
+        {
+          "itemId": "A0001",
+          "itemName": "Tornillo M8 x 40 (caja 500)",
+          "qty": 33,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "A-03-1",
+      "qty": 69,
+      "items": [
+        {
+          "itemId": "A0093",
+          "itemName": "Palé europeo usado",
+          "qty": 69,
+          "unit": "ea",
+          "licensePlate": "LP-A-03-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "A-03-2",
+      "qty": 165,
+      "items": [
+        {
+          "itemId": "A0014",
+          "itemName": "Rodamiento 6204 2RS",
+          "qty": 165,
+          "unit": "ea",
+          "licensePlate": "LP-A-03-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "A-04-1",
+      "qty": 167,
+      "items": [
+        {
+          "itemId": "A0031",
+          "itemName": "Motor 0,75 kW IE3",
+          "qty": 167,
+          "unit": "ea",
+          "licensePlate": "LP-A-04-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "A-05-0",
+      "qty": 58,
+      "items": [
+        {
+          "itemId": "A0031",
+          "itemName": "Motor 0,75 kW IE3",
+          "qty": 58,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "A-05-1",
+      "qty": 23,
+      "items": [
+        {
+          "itemId": "A0031",
+          "itemName": "Motor 0,75 kW IE3",
+          "qty": 23,
+          "unit": "ea",
+          "licensePlate": "LP-A-05-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": [
+        {
+          "workId": "W-1203",
+          "lineNum": 4,
+          "itemId": "A0031",
+          "qty": 1,
+          "unit": "ea"
+        }
+      ]
+    },
+    {
+      "locationId": "A-05-2",
+      "qty": 118,
+      "items": [
+        {
+          "itemId": "A0044",
+          "itemName": "Filtro de aire industrial",
+          "qty": 118,
+          "unit": "ea",
+          "licensePlate": "LP-A-05-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "A-06-0",
+      "qty": 28,
+      "items": [
+        {
+          "itemId": "A0093",
+          "itemName": "Palé europeo usado",
+          "qty": 28,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "A-06-2",
+      "qty": 120,
+      "items": [
+        {
+          "itemId": "A0020",
+          "itemName": "Cable 3x2,5 (rollo 100 m)",
+          "qty": 120,
+          "unit": "ea",
+          "licensePlate": "LP-A-06-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "A-07-0",
+      "qty": 24,
+      "items": [
+        {
+          "itemId": "A0007",
+          "itemName": "Correa trapezoidal A-42",
+          "qty": 24,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "A-07-1",
+      "qty": 192,
+      "items": [
+        {
+          "itemId": "A0093",
+          "itemName": "Palé europeo usado",
+          "qty": 192,
+          "unit": "ea",
+          "licensePlate": "LP-A-07-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "A-08-2",
+      "qty": 31,
+      "items": [
+        {
+          "itemId": "A0014",
+          "itemName": "Rodamiento 6204 2RS",
+          "qty": 31,
+          "unit": "ea",
+          "licensePlate": "LP-A-08-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": [
+        {
+          "workId": "W-1203",
+          "lineNum": 1,
+          "itemId": "A0014",
+          "qty": 1,
+          "unit": "ea"
+        }
+      ]
+    },
+    {
+      "locationId": "B-01-0",
+      "qty": 52,
+      "items": [
+        {
+          "itemId": "A0072",
+          "itemName": "Fusible 10 A (caja 50)",
+          "qty": 52,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "B-01-1",
+      "qty": 63,
+      "items": [
+        {
+          "itemId": "A0020",
+          "itemName": "Cable 3x2,5 (rollo 100 m)",
+          "qty": 63,
+          "unit": "ea",
+          "licensePlate": "LP-B-01-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "B-01-2",
+      "qty": 207,
+      "items": [
+        {
+          "itemId": "A0014",
+          "itemName": "Rodamiento 6204 2RS",
+          "qty": 207,
+          "unit": "ea",
+          "licensePlate": "LP-B-01-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "B-02-0",
+      "qty": 9,
+      "items": [
+        {
+          "itemId": "A0050",
+          "itemName": "Guantes nitrilo (caja 100)",
+          "qty": 9,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": [
+        {
+          "workId": "W-1204",
+          "lineNum": 2,
+          "itemId": "A0050",
+          "qty": 2,
+          "unit": "ea"
+        }
+      ]
+    },
+    {
+      "locationId": "B-02-1",
+      "qty": 211,
+      "items": [
+        {
+          "itemId": "A0020",
+          "itemName": "Cable 3x2,5 (rollo 100 m)",
+          "qty": 211,
+          "unit": "ea",
+          "licensePlate": "LP-B-02-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "B-03-1",
+      "qty": 170,
+      "items": [
+        {
+          "itemId": "A0031",
+          "itemName": "Motor 0,75 kW IE3",
+          "qty": 170,
+          "unit": "ea",
+          "licensePlate": "LP-B-03-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "B-04-0",
+      "qty": 10,
+      "items": [
+        {
+          "itemId": "A0020",
+          "itemName": "Cable 3x2,5 (rollo 100 m)",
+          "qty": 10,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "B-04-2",
+      "qty": 178,
+      "items": [
+        {
+          "itemId": "A0093",
+          "itemName": "Palé europeo usado",
+          "qty": 178,
+          "unit": "ea",
+          "licensePlate": "LP-B-04-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "B-05-1",
+      "qty": 143,
+      "items": [
+        {
+          "itemId": "A0031",
+          "itemName": "Motor 0,75 kW IE3",
+          "qty": 143,
+          "unit": "ea",
+          "licensePlate": "LP-B-05-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "B-05-2",
+      "qty": 123,
+      "items": [
+        {
+          "itemId": "A0044",
+          "itemName": "Filtro de aire industrial",
+          "qty": 123,
+          "unit": "ea",
+          "licensePlate": "LP-B-05-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "B-06-0",
+      "qty": 15,
+      "items": [
+        {
+          "itemId": "A0007",
+          "itemName": "Correa trapezoidal A-42",
+          "qty": 15,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": [
+        {
+          "workId": "W-1203",
+          "lineNum": 3,
+          "itemId": "A0007",
+          "qty": 4,
+          "unit": "ea"
+        }
+      ]
+    },
+    {
+      "locationId": "B-07-1",
+      "qty": 135,
+      "items": [
+        {
+          "itemId": "A0020",
+          "itemName": "Cable 3x2,5 (rollo 100 m)",
+          "qty": 135,
+          "unit": "ea",
+          "licensePlate": "LP-B-07-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "B-07-2",
+      "qty": 219,
+      "items": [
+        {
+          "itemId": "A0060",
+          "itemName": "Lubricante multiuso 5 l",
+          "qty": 219,
+          "unit": "ea",
+          "licensePlate": "LP-B-07-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "B-08-0",
+      "qty": 55,
+      "items": [
+        {
+          "itemId": "A0060",
+          "itemName": "Lubricante multiuso 5 l",
+          "qty": 55,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "B-08-1",
+      "qty": 33,
+      "items": [
+        {
+          "itemId": "A0044",
+          "itemName": "Filtro de aire industrial",
+          "qty": 33,
+          "unit": "ea",
+          "licensePlate": "LP-B-08-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": [
+        {
+          "workId": "W-1204",
+          "lineNum": 1,
+          "itemId": "A0044",
+          "qty": 6,
+          "unit": "ea"
+        }
+      ]
+    },
+    {
+      "locationId": "B-08-2",
+      "qty": 123,
+      "items": [
+        {
+          "itemId": "A0007",
+          "itemName": "Correa trapezoidal A-42",
+          "qty": 123,
+          "unit": "ea",
+          "licensePlate": "LP-B-08-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "C-01-2",
+      "qty": 174,
+      "items": [
+        {
+          "itemId": "A0085",
+          "itemName": "Brida nylon 300 mm (bolsa 100)",
+          "qty": 174,
+          "unit": "ea",
+          "licensePlate": "LP-C-01-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "C-02-0",
+      "qty": 58,
+      "items": [
+        {
+          "itemId": "A0050",
+          "itemName": "Guantes nitrilo (caja 100)",
+          "qty": 58,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "C-02-1",
+      "qty": 135,
+      "items": [
+        {
+          "itemId": "A0031",
+          "itemName": "Motor 0,75 kW IE3",
+          "qty": 135,
+          "unit": "ea",
+          "licensePlate": "LP-C-02-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "C-02-2",
+      "qty": 230,
+      "items": [
+        {
+          "itemId": "A0044",
+          "itemName": "Filtro de aire industrial",
+          "qty": 230,
+          "unit": "ea",
+          "licensePlate": "LP-C-02-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "C-04-0",
+      "qty": 39,
+      "items": [
+        {
+          "itemId": "A0031",
+          "itemName": "Motor 0,75 kW IE3",
+          "qty": 39,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "C-04-1",
+      "qty": 147,
+      "items": [
+        {
+          "itemId": "A0093",
+          "itemName": "Palé europeo usado",
+          "qty": 147,
+          "unit": "ea",
+          "licensePlate": "LP-C-04-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "C-04-2",
+      "qty": 114,
+      "items": [
+        {
+          "itemId": "A0050",
+          "itemName": "Guantes nitrilo (caja 100)",
+          "qty": 114,
+          "unit": "ea",
+          "licensePlate": "LP-C-04-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "C-05-0",
+      "qty": 48,
+      "items": [
+        {
+          "itemId": "A0050",
+          "itemName": "Guantes nitrilo (caja 100)",
+          "qty": 48,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "C-05-2",
+      "qty": 141,
+      "items": [
+        {
+          "itemId": "A0001",
+          "itemName": "Tornillo M8 x 40 (caja 500)",
+          "qty": 141,
+          "unit": "ea",
+          "licensePlate": "LP-C-05-2",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "C-06-1",
+      "qty": 83,
+      "items": [
+        {
+          "itemId": "A0007",
+          "itemName": "Correa trapezoidal A-42",
+          "qty": 83,
+          "unit": "ea",
+          "licensePlate": "LP-C-06-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "C-07-1",
+      "qty": 94,
+      "items": [
+        {
+          "itemId": "A0085",
+          "itemName": "Brida nylon 300 mm (bolsa 100)",
+          "qty": 94,
+          "unit": "ea",
+          "licensePlate": "LP-C-07-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    },
+    {
+      "locationId": "C-08-0",
+      "qty": 9,
+      "items": [
+        {
+          "itemId": "A0001",
+          "itemName": "Tornillo M8 x 40 (caja 500)",
+          "qty": 9,
+          "unit": "ea",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": [
+        {
+          "workId": "W-1203",
+          "lineNum": 2,
+          "itemId": "A0001",
+          "qty": 2,
+          "unit": "ea"
+        }
+      ]
+    },
+    {
+      "locationId": "C-08-1",
+      "qty": 68,
+      "items": [
+        {
+          "itemId": "A0001",
+          "itemName": "Tornillo M8 x 40 (caja 500)",
+          "qty": 68,
+          "unit": "ea",
+          "licensePlate": "LP-C-08-1",
+          "inventoryStatus": "Available"
+        }
+      ],
+      "openPicks": []
+    }
+  ]
+}

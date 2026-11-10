@@ -1,0 +1,194 @@
+// =====================================================================
+//  Modelo WH3D — custom service de rutas de picking con coordenadas
+//  Esqueleto de referencia. Los "// TODO" son nombres de campos/tablas
+//  que dependen de la versión (feature Warehouse spatial location).
+// =====================================================================
+
+// ---------- Data contracts ----------
+
+[DataContract]
+class WHS3DPutContract
+{
+    str locationId; real x; real y; real z;
+
+    [DataMember("locationId")] public str parmLocationId(str _v = locationId) { locationId = _v; return locationId; }
+    [DataMember("x")] public real parmX(real _v = x) { x = _v; return x; }
+    [DataMember("y")] public real parmY(real _v = y) { y = _v; return y; }
+    [DataMember("z")] public real parmZ(real _v = z) { z = _v; return z; }
+}
+
+[DataContract]
+class WHS3DRouteLineContract
+{
+    int lineNum; str workType; str locationId; str itemId; str itemName;
+    real qty; str unit; real x; real y; real z; real distanceToNext;
+
+    [DataMember("lineNum")]        public int  parmLineNum(int _v = lineNum) { lineNum = _v; return lineNum; }
+    [DataMember("workType")]       public str  parmWorkType(str _v = workType) { workType = _v; return workType; }
+    [DataMember("locationId")]     public str  parmLocationId(str _v = locationId) { locationId = _v; return locationId; }
+    [DataMember("itemId")]         public str  parmItemId(str _v = itemId) { itemId = _v; return itemId; }
+    [DataMember("itemName")]       public str  parmItemName(str _v = itemName) { itemName = _v; return itemName; }
+    [DataMember("qty")]            public real parmQty(real _v = qty) { qty = _v; return qty; }
+    [DataMember("unit")]           public str  parmUnit(str _v = unit) { unit = _v; return unit; }
+    [DataMember("x")]              public real parmX(real _v = x) { x = _v; return x; }
+    [DataMember("y")]              public real parmY(real _v = y) { y = _v; return y; }
+    [DataMember("z")]              public real parmZ(real _v = z) { z = _v; return z; }
+    [DataMember("distanceToNext")] public real parmDistanceToNext(real _v = distanceToNext) { distanceToNext = _v; return distanceToNext; }
+}
+
+[DataContract]
+class WHS3DRouteContract
+{
+    str workId; str loadId; str warehouseId; str workStatus; str strategy; str algorithm;
+    WHS3DPutContract putLocation;
+    List lines;         // List of WHS3DRouteLineContract
+    real totalDistance;
+    List explanation;   // List of str
+
+    [DataMember("workId")]      public str parmWorkId(str _v = workId) { workId = _v; return workId; }
+    [DataMember("loadId")]      public str parmLoadId(str _v = loadId) { loadId = _v; return loadId; }
+    [DataMember("warehouseId")] public str parmWarehouseId(str _v = warehouseId) { warehouseId = _v; return warehouseId; }
+    [DataMember("workStatus")]  public str parmWorkStatus(str _v = workStatus) { workStatus = _v; return workStatus; }
+    [DataMember("strategy")]    public str parmStrategy(str _v = strategy) { strategy = _v; return strategy; }
+    [DataMember("algorithm")]   public str parmAlgorithm(str _v = algorithm) { algorithm = _v; return algorithm; }
+    [DataMember("putLocation")] public WHS3DPutContract parmPutLocation(WHS3DPutContract _v = putLocation) { putLocation = _v; return putLocation; }
+    [DataMember("lines"), DataCollection(Types::Class, classStr(WHS3DRouteLineContract))]
+    public List parmLines(List _v = lines) { lines = _v; return lines; }
+    [DataMember("totalDistance")] public real parmTotalDistance(real _v = totalDistance) { totalDistance = _v; return totalDistance; }
+    [DataMember("explanation"), DataCollection(Types::String)]
+    public List parmExplanation(List _v = explanation) { explanation = _v; return explanation; }
+}
+
+// ---------- Service ----------
+
+class WHS3DRouteService
+{
+    /// POST /api/services/WHS3DServiceGroup/WHS3DRouteService/getRoute  { "_workId": "W-1203" }
+    public WHS3DRouteContract getRoute(str _workId)
+    {
+        WHSWorkTable    workTable;
+        WHSWorkLine     workLine;
+        WMSLocation     location;
+        InventTable     inventTable;
+        WHS3DRouteContract route = new WHS3DRouteContract();
+        List lines = new List(Types::Class);
+        List expl  = new List(Types::String);
+        WHS3DRouteLineContract prev;
+        real total;
+        boolean firstPutFound;
+
+        select firstonly workTable where workTable.WorkId == _workId;
+        if (!workTable)
+        {
+            throw error(strFmt("Work %1 no encontrado", _workId));
+        }
+
+        route.parmWorkId(workTable.WorkId);
+        route.parmLoadId(workTable.LoadId);
+        route.parmWarehouseId(workTable.InventLocationId);
+        route.parmWorkStatus(enum2Symbol(enumNum(WHSWorkStatus), workTable.WorkStatus));
+
+        // TODO: leer estrategia y algoritmo del almacén (campos añadidos por la feature spatial location)
+        //       En el formulario Warehouses (InventLocation), sección "Warehouse coordinates configuration":
+        //       "Distance calculation strategy" y "Location sorting algorithm". Nombre del campo: comprobar en AOT.
+        route.parmStrategy("CityBlock");
+        route.parmAlgorithm("Fast");
+
+        // Put location = primera línea Put
+        select firstonly workLine order by LineNum
+            where workLine.WorkId == _workId && workLine.WorkType == WHSWorkType::Put;
+        if (workLine)
+        {
+            location = WMSLocation::find(workLine.WMSLocationId, workLine.InventLocationId);
+            WHS3DPutContract put = new WHS3DPutContract();
+            put.parmLocationId(location.wMSLocationId);
+            put.parmX(WHS3DRouteService::coordX(location));
+            put.parmY(WHS3DRouteService::coordY(location));
+            put.parmZ(WHS3DRouteService::coordZ(location));
+            route.parmPutLocation(put);
+        }
+
+        // Pick lines anteriores al primer Put, en el orden ya calculado por "Sort picking work lines".
+        // Es exactamente lo que ordena F&O: los picks posteriores al primer put no se tocan.
+        // Si el work sale Pick/Put/Pick/Put, F&O no ha ordenado nada: revisar el work template (fno/README.md).
+        // TODO: comprobar en el AOT si WHSWorkLine tiene InventLocationId; si no, usar workTable.InventLocationId.
+        while select workLine order by LineNum
+            where workLine.WorkId == _workId
+        {
+            if (workLine.WorkType == WHSWorkType::Put) { break; }
+            if (workLine.WorkType != WHSWorkType::Pick) { continue; }
+
+            location = WMSLocation::find(workLine.WMSLocationId, workLine.InventLocationId);
+            inventTable = InventTable::find(workLine.ItemId);
+
+            WHS3DRouteLineContract l = new WHS3DRouteLineContract();
+            l.parmLineNum(workLine.LineNum);
+            l.parmWorkType("Pick");
+            l.parmLocationId(location.wMSLocationId);
+            l.parmItemId(workLine.ItemId);
+            l.parmItemName(inventTable.itemName());
+            l.parmQty(workLine.QtyWork);
+            l.parmUnit(workLine.UnitId);
+            l.parmX(WHS3DRouteService::coordX(location));
+            l.parmY(WHS3DRouteService::coordY(location));
+            l.parmZ(WHS3DRouteService::coordZ(location));
+            lines.addEnd(l);
+        }
+
+        // Distancias (city block, misma fórmula que F&O: |dx| + |dy| + |z1| + |z2|). Solo aritmética, el orden no se toca.
+        // explanation[] la completa la API; aquí va una frase mínima.
+        ListEnumerator en = lines.getEnumerator();
+        while (en.moveNext())
+        {
+            WHS3DRouteLineContract cur = en.current();
+            if (prev) { real d = WHS3DRouteService::cityBlock(prev, cur); prev.parmDistanceToNext(d); total += d; }
+            prev = cur;
+        }
+        if (prev && route.parmPutLocation())
+        {
+            WHS3DRouteLineContract putAsLine = new WHS3DRouteLineContract();
+            putAsLine.parmX(route.parmPutLocation().parmX()); putAsLine.parmY(route.parmPutLocation().parmY()); putAsLine.parmZ(route.parmPutLocation().parmZ());
+            real dLast = WHS3DRouteService::cityBlock(prev, putAsLine);
+            prev.parmDistanceToNext(dLast); total += dLast;
+        }
+
+        route.parmLines(lines);
+        route.parmTotalDistance(total);
+        expl.addEnd(strFmt("Se han ordenado %1 líneas de pick; el put en %2 cierra el work.", lines.elements(), route.parmPutLocation() ? route.parmPutLocation().parmLocationId() : ""));
+        route.parmExplanation(expl);
+        return route;
+    }
+
+    /// POST /api/services/WHS3DServiceGroup/WHS3DRouteService/getLoadRoutes  { "_loadId": "LD-0042" }
+    /// Una carga puede tener varios works; F&O ordena cada uno por separado. Devolvemos una ruta por work.
+    [AifCollectionTypeAttribute('return', Types::Class, classStr(WHS3DRouteContract))]
+    public List getLoadRoutes(str _loadId)
+    {
+        WHSWorkTable workTable;
+        List routes = new List(Types::Class);
+
+        while select WorkId from workTable order by WorkId
+            where workTable.LoadId == _loadId
+               && workTable.WorkTransType == WHSWorkTransType::Sales
+               && workTable.WorkStatus != WHSWorkStatus::Cancelled
+        {
+            routes.addEnd(this.getRoute(workTable.WorkId));
+        }
+        return routes;
+    }
+
+    // TODO: sustituir por los campos reales de coordenadas de WMSLocation (feature spatial location).
+    //       En el formulario Locations se llaman "X coordinate" / "Y coordinate" / "Z coordinate".
+    private static real coordX(WMSLocation _loc) { return _loc.(fieldName2Id(tableNum(WMSLocation), "WHSSpatialCoordinateX")); }
+    private static real coordY(WMSLocation _loc) { return _loc.(fieldName2Id(tableNum(WMSLocation), "WHSSpatialCoordinateY")); }
+    private static real coordZ(WMSLocation _loc) { return _loc.(fieldName2Id(tableNum(WMSLocation), "WHSSpatialCoordinateZ")); }
+
+    private static real cityBlock(WHS3DRouteLineContract _a, WHS3DRouteLineContract _b)
+    {
+        return abs(_b.parmX() - _a.parmX()) + abs(_b.parmY() - _a.parmY()) + abs(_a.parmZ()) + abs(_b.parmZ());
+    }
+}
+
+// Nota: getLayout(str _warehouseId) sigue el mismo patrón recorriendo WMSLocation del almacén
+//       y devolviendo { locationId, zone (WMSLocation.ZoneId), aisle/rack/level (parsear de LocationId o
+//       de los campos del Location setup wizard), x, y, z, profile (LocationProfileId) }.
